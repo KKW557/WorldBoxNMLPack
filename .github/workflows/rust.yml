@@ -73,6 +73,14 @@ jobs:
           "$($hash.Hash)  $($env:BIN_NAME).exe" |
             Out-File -Encoding ASCII "$file.sha256"
 
+      - name: Upload artifacts (CI)
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BIN_NAME }}-${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/release/${{ env.BIN_NAME }}*
+
       - name: Upload binaries & hashes to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
