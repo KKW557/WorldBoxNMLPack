@@ -23,8 +23,8 @@ struct Cli {
     )]
     build: String,
 
-    /// Whether to run the build command before packing.
-    #[arg(long, help = "Whether to run the build command before packing")]
+    /// Whether to build binary.
+    #[arg(short, long, help = "Whether to build binary")]
     compile: bool,
 
     /// Additional files or directories to include.
@@ -36,6 +36,10 @@ struct Cli {
     /// If not specified, it defaults to the 'bin/mods/<name>-<version>.zip'.
     #[arg(short, long, help = "The final output path of the packed zip file")]
     output: Option<String>,
+
+    /// Whether to include PDB files.
+    #[arg(long, help = "Whether to include PDB files")]
+    pdb: bool,
 
     /// Source code directories.
     /// Default values are provided for compatibility with various project layouts.
@@ -64,7 +68,7 @@ fn main() -> Result<()> {
     let output = generate_output_path(&cli.output, &files)?;
 
     if cli.compile {
-        compile(&cli.build, &mut files)?;
+        compile(&cli.build, cli.pdb, &mut files)?;
     } else {
         collect_sources(&cli.sources, &mut files)?;
     }
@@ -171,7 +175,7 @@ fn generate_output_path(output: &Option<String>, files: &[File]) -> Result<PathB
     Ok(output)
 }
 
-fn compile(build: &str, files: &mut Vec<File>) -> Result<()> {
+fn compile(build: &str, pdb: bool, files: &mut Vec<File>) -> Result<()> {
     println!("Compiling with: {}\n", build);
 
     let parts = shlex::split(build).ok_or_else(|| anyhow!("Invalid build command: {}", build))?;
@@ -197,8 +201,20 @@ fn compile(build: &str, files: &mut Vec<File>) -> Result<()> {
 
         if let Some(source) = get_dotnet_build(&line) {
             let target = source.file_name().map(PathBuf::from).unwrap_or_default();
-            files.push(File { source, target });
+            files.push(File {
+                source: source.clone(),
+                target,
+            });
             count += 1;
+
+            if pdb {
+                let source = source.with_extension("pdb");
+                if source.exists() {
+                    let target = source.file_name().map(PathBuf::from).unwrap_or_default();
+                    files.push(File { source, target });
+                    count += 1;
+                }
+            }
         };
     }
 
