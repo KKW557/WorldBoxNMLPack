@@ -33,7 +33,7 @@ struct Cli {
     include: Vec<String>,
 
     /// The final output path of the packed zip file.
-    /// If not specified, it defaults to the 'mods/<name>-<version>.zip'.
+    /// If not specified, it defaults to the 'bin/mods/<name>-<version>.zip'.
     #[arg(short, long, help = "The final output path of the packed zip file")]
     output: Option<String>,
 
@@ -158,7 +158,7 @@ fn generate_output_path(output: &Option<String>, files: &[File]) -> Result<PathB
         let mod_struct: Mod = serde_json::from_str(&content)
             .with_context(|| format!("Failed to parse: {}", mod_json.display()))?;
 
-        PathBuf::from("mods").join(format!("{}-{}.zip", mod_struct.name, mod_struct.version))
+        PathBuf::from("bin/Mod").join(format!("{}-{}.zip", mod_struct.name, mod_struct.version))
     };
 
     if let Some(parent) = output.parent() {

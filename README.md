@@ -1,8 +1,26 @@
 # WorldBoxNMLPack
-A simple NML mod packer.
 
-```terminaloutput
-Usage: nmlpack.exe [OPTIONS]
+A simple CLI tool for packing [WorldBox](https://www.superworldbox.com/) mods that use the [NeoModLoader](https://github.com/WorldBoxOpenMods/ModLoader).
+
+## Features
+
+- **Automated Packing**: Quickly zip your mod files into a structure compatible with NML.
+- **Build Integration**: Option to trigger your build command (e.g., `dotnet build`) before packing.
+- **Flexible Configuration**: Customize included source folders, assets, and additional files via command-line options.
+
+## Usage
+
+Execute the command below from the project root:
+
+```shell
+nmlpack --compile
+```
+
+More options:
+
+```shell
+> nmlpack -h
+Usage: nmlpack [OPTIONS]
 
 Options:
       --assets <ASSETS>    Asset directories to be included in the package [default: assets]
@@ -14,3 +32,7 @@ Options:
   -h, --help               Print help
   -V, --version            Print version
 ```
+
+## License
+
+This project is licensed under the [MIT License](/LICENSE) © 2025 557.
