@@ -18,7 +18,7 @@ struct Cli {
     /// The command used to build the project
     #[arg(
         long,
-        default_value = "dotnet build",
+        default_value = "dotnet build -p:DebugType=Portable",
         help = "The command used to build the project"
     )]
     build: String,
