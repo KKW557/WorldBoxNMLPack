@@ -88,15 +88,20 @@ jobs:
         with:
           path: dist
 
-      - name: Zip
+      - name: Package artifacts
         run: |
           cd dist
           for dir in */ ; do
             dir="${dir%/}"
-            (
-              cd "$dir"
-              zip -r "../${dir}.zip" *
-            )
+
+            if find "$dir" -type f -name "*.exe" | grep -q .; then
+              (
+                cd "$dir"
+                zip -r "../${dir}.zip" *
+              )
+            else
+              tar -czf "${dir}.tar.gz" "$dir"
+            fi
           done
 
       - name: Publish
