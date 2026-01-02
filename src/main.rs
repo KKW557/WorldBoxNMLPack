@@ -222,7 +222,13 @@ fn compile(build: &str, pdb: bool, files: &mut Vec<File>) -> Result<()> {
         files.extend(pdbs);
     }
 
-    println!("\nCompiled {} files", count);
+    println!();
+
+    if count == 0 {
+        bail!("No compiled files found");
+    } else {
+        println!("Compiled {} files", count);
+    }
 
     Ok(())
 }

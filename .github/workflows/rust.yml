@@ -6,10 +6,10 @@ permissions:
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - "*"
   pull_request:
     branches: [ "main" ]
-  release:
-    types: [ created ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -36,6 +36,14 @@ jobs:
             target: x86_64-pc-windows-msvc
             test: true
 
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            test: true
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            test: false
+
     steps:
       - uses: actions/checkout@v4
 
@@ -58,11 +66,11 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }} --bin ${{ env.BIN_NAME }}
 
       - name: Run tests
-        if: matrix.test && github.event_name != 'release'
+        if: matrix.test && github.ref_type != 'tag'
         run: cargo test --release
 
       - name: Upload artifacts (CI)
-        if: github.event_name != 'release'
+        if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BIN_NAME }}-${{ matrix.target }}
@@ -71,7 +79,7 @@ jobs:
             target/${{ matrix.target }}/release/${{ env.BIN_NAME }}.exe
 
       - name: Package (Linux)
-        if: github.event_name == 'release' && runner.os == 'Linux'
+        if: github.ref_type == 'tag' && runner.os == 'Linux'
         run: |
           cd target/${{ matrix.target }}/release
           tar -czf \
@@ -79,7 +87,7 @@ jobs:
             ${{ env.BIN_NAME }}
 
       - name: Package (Windows)
-        if: github.event_name == 'release' && runner.os == 'Windows'
+        if: github.ref_type == 'tag' && runner.os == 'Windows'
         shell: pwsh
         run: |
           $out = "target/${{ matrix.target }}/release/${{ env.BIN_NAME }}-${{ matrix.target }}.zip"
@@ -87,9 +95,18 @@ jobs:
             -Path "target/${{ matrix.target }}/release/${{ env.BIN_NAME }}.exe" `
             -DestinationPath $out
 
+      - name: Package (macOS)
+        if: github.ref_type == 'tag' && runner.os == 'macOS'
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar -czf \
+            ${{ env.BIN_NAME }}-${{ matrix.target }}.tar.gz \
+            ${{ env.BIN_NAME }}
+
       - name: Upload binaries to Release
-        if: github.event_name == 'release'
+        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: |
             target/${{ matrix.target }}/release/${{ env.BIN_NAME }}-${{ matrix.target }}.*
