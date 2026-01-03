@@ -36,4 +36,4 @@ Options:
 
 ## License
 
-This project is licensed under the [MIT License](/LICENSE) © 2025 557.
+This project is licensed under the [MIT License](LICENSE) © 2025 557.
